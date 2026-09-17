@@ -8,6 +8,9 @@ Create, edit, delete and complete tasks. Search them, filter them by status and 
 
 ---
 
+
+token: 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
+
 ## Technologies
 
 | Layer | Choice | Why |

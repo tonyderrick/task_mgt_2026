@@ -1,117 +1,172 @@
-# kLab Tech Upskill Program
-## Full-Stack Coding Challenge
+# Task Manager
 
-Congratulations on being shortlisted for the **kLab Tech Upskill Program**! 🎉
+A full-stack task management application built for the kLab Tech Upskill Program coding challenge.
 
-As part of the final selection process, you are required to complete this coding challenge. The challenge will assess your ability to build a simple application with a **frontend, backend, API, and database**.
+Create, edit, delete and complete tasks. Search them, filter them by status and priority, and sort them. Everything is stored in MySQL and served through a REST API.
+
+**Live demo:** _add your deployment link here_
 
 ---
 
-## 💻 Challenge: Task Management System
+## Technologies
 
-Build a simple web application that allows users to manage tasks.
+| Layer | Choice | Why |
+|---|---|---|
+| Frontend | React 18 + Vite | Fast dev server, no framework overhead for a single-screen app |
+| Backend | Node.js + Express 4 | Small, explicit REST layer that is easy to read and explain |
+| Database | MySQL 8 (`mysql2` driver) | Relational, and the task model is a single well-defined table |
+| Styling | Plain CSS with custom properties | No utility framework to learn or ship |
 
-### Your application should allow users to:
+---
 
-- View all tasks
-- Create a task
-- Edit a task
-- Delete a task
-- Mark a task as **Pending** or **Completed**
-- Filter tasks by status
+## Requirements
 
-Each task should contain at least:
+- Node.js 18 or newer
+- MySQL 8 (or MariaDB 10.4+) running locally
 
-```text
-id
-title
-description
-status
-priority
-createdAt
+---
+
+## Getting started
+
+### 1. Backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env      # then edit DB_USER / DB_PASSWORD
 ```
-## 🔧 Backend Requirements
 
-Create a **REST API** to manage the tasks.
+Set up the database (creates the database if it does not exist, then the `tasks` table):
 
-At minimum, implement the following endpoints:
+
+Start the API:
+
+```bash
+npm run dev               # nodemon, http://localhost:4000
+
+
+Check it is alive: `curl http://localhost:4000/api/health`
+
+### 2. Frontend
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env      # VITE_API_URL=http://localhost:4000/api
+npm run dev               # http://localhost:5173
+```
+
+---
+
+## Database setup
+
+
+```sql
+CREATE DATABASE task_mgt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE task_mgt;
+-- then paste the contents of backend/src/db/schema.sql
+```
+
+## API
+
+Base URL: `http://localhost:4000/api`
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| `GET` | `/tasks` | Get all tasks |
+| `GET` | `/tasks` | List tasks (supports filtering, search, sorting) |
 | `GET` | `/tasks/:id` | Get one task |
 | `POST` | `/tasks` | Create a task |
-| `PUT` | `/tasks/:id` | Update a task |
+| `PUT` | `/tasks/:id` | Update a task (any subset of fields) |
 | `DELETE` | `/tasks/:id` | Delete a task |
+| `GET` | `/health` | Service check |
 
-The task data must be stored in a **database**.
+### Query parameters on `GET /tasks`
+
+| Parameter | Values | Effect |
+|---|---|---|
+| `status` | `pending`, `completed` | Filter by status |
+| `priority` | `low`, `medium`, `high` | Filter by priority |
+| `search` | any text | Matches title or description |
+| `sort` | `newest` (default), `oldest`, `priority` | Ordering |
+
+Example: `GET /api/tasks?status=pending&priority=high&search=report&sort=priority`
+
+### Create a task
+
+```bash
+curl -X POST http://localhost:4000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Submit the challenge","description":"Push and fill the form","priority":"high"}'
+```
+
+```json
+{
+  "data": {
+    "id": 6,
+    "title": "Submit the challenge",
+    "description": "Push and fill the form",
+    "status": "pending",
+    "priority": "high",
+    "createdAt": "2026-09-17T09:12:44.000Z",
+    "updatedAt": "2026-09-17T09:12:44.000Z"
+  }
+}
+```
+
+### Mark a task completed
+
+```bash
+curl -X PUT http://localhost:4000/api/tasks/6 \
+  -H "Content-Type: application/json" \
+  -d '{"status":"completed"}'
+```
+
+### Validation errors
+
+A bad payload returns `400` with the offending fields named:
+
+```json
+{
+  "message": "Some fields need fixing.",
+  "errors": { "title": "Title is required." }
+}
+```
+
+Other responses: `404` for a missing task or unknown route, `204` on delete,
+`503` when MySQL is unreachable.
 
 ---
 
-## 🛠️ Technology
+## Features included
 
-You are free to use technologies you are comfortable with.
+- [x] View, create, edit and delete tasks
+- [x] Toggle between pending and completed
+- [x] Filter by status and by priority
+- [x] Search across title and description (debounced, server-side)
+- [x] Form validation on both client and server
+- [x] Sorting by date or priority
+- [x] Responsive layout, keyboard focus states, reduced-motion support
+- [x] Loading, empty and error states
+- [x] API documentation (above)
 
-### Examples
+## Project structure
 
-**Frontend:**
-- React
-- Next.js
-- Vue
-- Angular
-
-**Backend:**
-- Node.js / Express
-- Django
-- Laravel
-- Spring Boot
-
-**Database:**
-- PostgreSQL
-- MySQL
-- MongoDB
-- SQLite
-
-> **Note:** We are interested in your ability to build and explain the solution, not in a specific technology.
-
----
-
-## ⭐ Optional Features
-
-If you have time, you may add:
-
-- User authentication
-- Search
-- Pagination
-- Form validation
-- Tests
-- API documentation
-- Deployment
-- Improved UI/UX
-
-> These features are **not required**. Focus on completing the core requirements first.
-
----
-
-## 📤 How to Submit
-
-1. **Fork this repository** to your GitHub account or create a new repository.
-2. Build your solution in the repository (yours or forked).
-3. Add a `README.md` explaining:
-   - Technologies used
-   - How to install and run the project
-   - How to set up the database
-   - Any important technical decisions or additional features
-4. If possible, **deploy your application** and include the live demo link in your README.
-5. Submit your project using the this [Link](https://forms.gle/BtwBgyGT1hXVdb1TA)
-
-### The submission form will ask for:
-
-- Full name
-- Email address
-- GitHub repository link
-- Live demo link (if available)
-- Technologies used
-- Other basic information about your submission
-
-> **Submission deadline:** Friday, 18 September 2026 at **8:30 AM (Rwanda Time)**.
+```
+task-manager/
+├── backend/
+│   └── src/
+│       ├── app.js                  Express app, CORS, JSON, route mounting
+│       ├── server.js               Entry point
+│       ├── controllers/            Query building and SQL
+│       ├── middleware/             Validation and error handling
+│       ├── routes/                 Endpoint definitions
+│       └── db/                     Pool, schema.sql, init and seed scripts
+└── frontend/
+    └── src/
+        ├── App.jsx                 State, filters, CRUD orchestration
+        ├── api/tasks.js            Fetch wrapper and typed errors
+        ├── components/             Rail, rows, dialogs, icons
+        └── styles.css              Design tokens and styles
+```
